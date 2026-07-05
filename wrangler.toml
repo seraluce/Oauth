@@ -6,7 +6,7 @@ pages_build_output_dir = ".open-next"
 [[d1_databases]]
 binding = "DB"
 database_name = "sso-auth-db"
-database_id = "<YOUR_D1_DATABASE_ID>"
+database_id = "07ad50d3-a18c-4522-bc81-69c8b936eabb"
 
 [vars]
 DB_DRIVER = "d1"
