@@ -1,0 +1,10 @@
+name = "sso-auth"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+[vars]
+DB_DRIVER = "sqlite"
+NEXT_PUBLIC_APP_NAME = "SSO Auth"
+EMAIL_MODE = "console"
+NODE_ENV = "production"

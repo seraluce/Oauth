@@ -7,12 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "pages:build": "npx @opennextjs/cloudflare build",
+    "pages:deploy": "npm run pages:build && wrangler pages deploy .vercel/output/static",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit push",
     "db:seed": "npx tsx src/lib/db/seed.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.1",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.11.1",
     "clsx": "^2.1.1",
