@@ -21,6 +21,7 @@
     "better-sqlite3": "^12.11.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
+    "esbuild": "^0.25.0",
     "jose": "^6.2.3",
     "lucide-react": "^1.23.0",
     "mysql2": "^3.22.5",
