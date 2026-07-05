@@ -58,3 +58,4 @@ local.db
 # agent configs
 AGENTS.md
 CLAUDE.md
+.wrangler/

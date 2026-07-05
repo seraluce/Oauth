@@ -1,7 +1,12 @@
 name = "sso-auth"
+main = ".open-next/worker.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".open-next"
+workers_dev = true
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
 
 [[d1_databases]]
 binding = "DB"
@@ -12,3 +17,8 @@ database_id = "2a1052bb-e19f-4de6-9b62-5d22146e0c31"
 DB_DRIVER = "d1"
 NEXT_PUBLIC_APP_NAME = "SSO Auth"
 EMAIL_MODE = "console"
+NEXT_PUBLIC_APP_URL = "https://oauth.nelv.cn"
+SSO_ISSUER = "https://oauth.nelv.cn"
+JWT_SECRET = "5fe568243d1a08544d79178767f8cc6ba1ad8754002eb74a99f7b21ad9002d02"
+SESSION_SECRET = "cdc856ba2fe07524e5faa7a80dc50cd89718ea5113e768c67aaefe18d58e2e20"
+ENCRYPTION_KEY = "99477dc724736d285d982750e94c4a92f82f9af93e986fc4b5a067ee1a139283"
