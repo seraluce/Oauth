@@ -11,6 +11,7 @@ import {
   CardContent,
 } from "@/components/ui/elements";
 import { useToast } from "@/components/providers/toast-provider";
+import { useTranslation } from "@/lib/i18n";
 import { Plus, Copy, AppWindow, Loader2 } from "lucide-react";
 
 interface Application {
@@ -26,6 +27,7 @@ interface Application {
 
 export default function AdminApplicationsPage() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [apps, setApps] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -67,13 +69,13 @@ export default function AdminApplicationsPage() {
 
       if (!res.ok) throw new Error("Failed to create");
       const data = await res.json();
-      toast(`Application created. Client Secret: ${data.data.clientSecret}`, "success");
+      toast(t.admin.appCreated.replace("{secret}", data.data.clientSecret), "success");
       setShowCreate(false);
       setNewName("");
       setNewRedirectUri("");
       fetchApps();
     } catch {
-      toast("Failed to create application", "error");
+      toast(t.admin.failedToCreate, "error");
     } finally {
       setIsCreating(false);
     }
@@ -81,36 +83,32 @@ export default function AdminApplicationsPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast("Copied to clipboard", "success");
+    toast(t.common.copied, "success");
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">SSO Applications</h2>
-          <p className="text-sm text-muted-foreground">
-            Manage OAuth2 applications that can authenticate through your SSO
-          </p>
+          <h2 className="text-2xl font-semibold tracking-tight">{t.admin.ssoApplications}</h2>
+          <p className="text-sm text-muted-foreground">{t.admin.ssoAppsDesc}</p>
         </div>
         <Button onClick={() => setShowCreate(!showCreate)}>
           <Plus className="h-4 w-4" />
-          New Application
+          {t.admin.newApplication}
         </Button>
       </div>
 
       {showCreate && (
         <Card>
           <CardHeader>
-            <CardTitle>Create Application</CardTitle>
-            <CardDescription>
-              Register a new OAuth2 application
-            </CardDescription>
+            <CardTitle>{t.admin.createApplication}</CardTitle>
+            <CardDescription>{t.admin.registerNewApp}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Application Name</label>
+                <label className="text-sm font-medium">{t.admin.applicationName}</label>
                 <Input
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
@@ -119,7 +117,7 @@ export default function AdminApplicationsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Redirect URI</label>
+                <label className="text-sm font-medium">{t.admin.redirectUri}</label>
                 <Input
                   value={newRedirectUri}
                   onChange={(e) => setNewRedirectUri(e.target.value)}
@@ -131,14 +129,10 @@ export default function AdminApplicationsPage() {
               <div className="flex gap-2">
                 <Button type="submit" disabled={isCreating}>
                   {isCreating && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Create
+                  {t.common.create}
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowCreate(false)}
-                >
-                  Cancel
+                <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>
+                  {t.common.cancel}
                 </Button>
               </div>
             </form>
@@ -156,18 +150,12 @@ export default function AdminApplicationsPage() {
                   <div>
                     <h3 className="font-semibold">{app.name}</h3>
                     {app.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {app.description}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{app.description}</p>
                     )}
                     <div className="mt-2 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">
-                          Client ID:
-                        </span>
-                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                          {app.clientId}
-                        </code>
+                        <span className="text-xs text-muted-foreground">Client ID:</span>
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{app.clientId}</code>
                         <button
                           onClick={() => copyToClipboard(app.clientId)}
                           className="text-muted-foreground hover:text-foreground"
@@ -176,19 +164,17 @@ export default function AdminApplicationsPage() {
                         </button>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Scopes: {app.scopes}
+                        {t.admin.scopes}: {app.scopes}
                       </p>
                     </div>
                   </div>
                 </div>
                 <span
                   className={`rounded px-2 py-0.5 text-xs ${
-                    app.isActive
-                      ? "bg-green-500/10 text-green-600"
-                      : "bg-red-500/10 text-red-600"
+                    app.isActive ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"
                   }`}
                 >
-                  {app.isActive ? "Active" : "Inactive"}
+                  {app.isActive ? t.admin.active : t.admin.inactive}
                 </span>
               </div>
             </CardContent>
@@ -198,9 +184,7 @@ export default function AdminApplicationsPage() {
           <Card>
             <CardContent className="pt-6 text-center">
               <AppWindow className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-sm text-muted-foreground">
-                No applications registered yet
-              </p>
+              <p className="mt-4 text-sm text-muted-foreground">{t.admin.noApplications}</p>
             </CardContent>
           </Card>
         )}

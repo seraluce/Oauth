@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/elements";
 import { useToast } from "@/components/providers/toast-provider";
 import { OAuthButtons } from "./oauth-buttons";
+import { useTranslation } from "@/lib/i18n";
 import { Loader2 } from "lucide-react";
 
 export function RegisterForm() {
@@ -26,10 +27,11 @@ export function RegisterForm() {
   const [isSendingCode, setIsSendingCode] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const sendCode = async () => {
     if (!email) {
-      toast("Please enter your email first", "error");
+      toast(t.auth.enterEmailFirst, "error");
       return;
     }
     setIsSendingCode(true);
@@ -41,9 +43,9 @@ export function RegisterForm() {
       });
       if (!res.ok) throw new Error("Failed to send code");
       setCodeSent(true);
-      toast("Verification code sent to your email", "success");
+      toast(t.auth.codeSent, "success");
     } catch {
-      toast("Failed to send verification code", "error");
+      toast(t.auth.failedToSendCode, "error");
     } finally {
       setIsSendingCode(false);
     }
@@ -61,12 +63,12 @@ export function RegisterForm() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || "Registration failed");
+      if (!res.ok) throw new Error(data.error?.message || t.auth.registrationFailed);
 
-      toast("Account created successfully", "success");
+      toast(t.auth.accountCreated, "success");
       router.push("/login");
     } catch (err: any) {
-      toast(err.message || "Registration failed", "error");
+      toast(err.message || t.auth.registrationFailed, "error");
     } finally {
       setIsLoading(false);
     }
@@ -75,21 +77,19 @@ export function RegisterForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Create account</CardTitle>
-        <CardDescription>
-          Enter your details to create a new account
-        </CardDescription>
+        <CardTitle className="text-2xl">{t.auth.createAccount}</CardTitle>
+        <CardDescription>{t.auth.enterDetails}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="username" className="text-sm font-medium">
-              Username
+              {t.auth.username}
             </label>
             <Input
               id="username"
               type="text"
-              placeholder="Choose a username"
+              placeholder={t.auth.chooseUsername}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -100,7 +100,7 @@ export function RegisterForm() {
           </div>
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t.auth.email}
             </label>
             <Input
               id="email"
@@ -114,12 +114,12 @@ export function RegisterForm() {
           </div>
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
-              Password
+              {t.auth.password}
             </label>
             <Input
               id="password"
               type="password"
-              placeholder="Min. 8 characters"
+              placeholder={t.auth.minChars}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -129,13 +129,13 @@ export function RegisterForm() {
           </div>
           <div className="space-y-2">
             <label htmlFor="code" className="text-sm font-medium">
-              Verification Code
+              {t.auth.verificationCode}
             </label>
             <div className="flex gap-2">
               <Input
                 id="code"
                 type="text"
-                placeholder="6-digit code"
+                placeholder={t.auth.sixDigitCode}
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 required
@@ -152,28 +152,28 @@ export function RegisterForm() {
                 {isSendingCode ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : codeSent ? (
-                  "Resend"
+                  t.auth.resend
                 ) : (
-                  "Send Code"
+                  t.auth.sendCode
                 )}
               </Button>
             </div>
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Create account
+            {t.auth.createAccount}
           </Button>
         </form>
         <div className="my-6 flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
-          <span className="text-xs text-muted-foreground">or continue with</span>
+          <span className="text-xs text-muted-foreground">{t.common.orContinueWith}</span>
           <div className="h-px flex-1 bg-border" />
         </div>
         <OAuthButtons />
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
+          {t.auth.alreadyHaveAccount}{" "}
           <Link href="/login" className="font-medium text-foreground hover:underline">
-            Sign in
+            {t.auth.signIn}
           </Link>
         </p>
       </CardContent>

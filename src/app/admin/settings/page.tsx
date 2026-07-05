@@ -11,10 +11,12 @@ import {
   CardContent,
 } from "@/components/ui/elements";
 import { useToast } from "@/components/providers/toast-provider";
+import { useTranslation } from "@/lib/i18n";
 import { Loader2, Settings } from "lucide-react";
 
 export default function AdminSettingsPage() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [siteName, setSiteName] = useState("SSO Auth");
   const [siteUrl, setSiteUrl] = useState("");
@@ -32,9 +34,9 @@ export default function AdminSettingsPage() {
       });
 
       if (!res.ok) throw new Error("Failed");
-      toast("Settings saved", "success");
+      toast(t.admin.settingsSaved, "success");
     } catch {
-      toast("Failed to save settings", "error");
+      toast(t.admin.failedToSave, "error");
     } finally {
       setIsLoading(false);
     }
@@ -43,10 +45,8 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">System Settings</h2>
-        <p className="text-sm text-muted-foreground">
-          Configure your SSO system
-        </p>
+        <h2 className="text-2xl font-semibold tracking-tight">{t.admin.systemSettings}</h2>
+        <p className="text-sm text-muted-foreground">{t.admin.systemSettingsDesc}</p>
       </div>
 
       <Card>
@@ -54,24 +54,19 @@ export default function AdminSettingsPage() {
           <div className="flex items-center gap-3">
             <Settings className="h-5 w-5 text-muted-foreground" />
             <div>
-              <CardTitle>General</CardTitle>
-              <CardDescription>
-                Basic system configuration
-              </CardDescription>
+              <CardTitle>{t.admin.general}</CardTitle>
+              <CardDescription>{t.admin.generalDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Site Name</label>
-              <Input
-                value={siteName}
-                onChange={(e) => setSiteName(e.target.value)}
-              />
+              <label className="text-sm font-medium">{t.admin.siteName}</label>
+              <Input value={siteName} onChange={(e) => setSiteName(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Site URL</label>
+              <label className="text-sm font-medium">{t.admin.siteUrl}</label>
               <Input
                 value={siteUrl}
                 onChange={(e) => setSiteUrl(e.target.value)}
@@ -81,10 +76,8 @@ export default function AdminSettingsPage() {
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border p-4">
               <div>
-                <p className="text-sm font-medium">Allow Registration</p>
-                <p className="text-xs text-muted-foreground">
-                  Allow new users to register accounts
-                </p>
+                <p className="text-sm font-medium">{t.admin.allowRegistration}</p>
+                <p className="text-xs text-muted-foreground">{t.admin.allowRegistrationDesc}</p>
               </div>
               <button
                 type="button"
@@ -102,7 +95,7 @@ export default function AdminSettingsPage() {
             </div>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Save Settings
+              {t.admin.saveSettings}
             </Button>
           </form>
         </CardContent>

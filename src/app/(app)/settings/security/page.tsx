@@ -11,10 +11,12 @@ import {
   CardContent,
 } from "@/components/ui/elements";
 import { useToast } from "@/components/providers/toast-provider";
+import { useTranslation } from "@/lib/i18n";
 import { Loader2, Shield, Key } from "lucide-react";
 
 export default function SecuritySettingsPage() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -33,11 +35,11 @@ export default function SecuritySettingsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error?.message || "Failed");
 
-      toast("Password changed successfully", "success");
+      toast(t.settings.passwordChanged, "success");
       setCurrentPassword("");
       setNewPassword("");
     } catch (err: any) {
-      toast(err.message || "Failed to change password", "error");
+      toast(err.message || t.settings.failedToChange, "error");
     } finally {
       setIsLoading(false);
     }
@@ -46,10 +48,8 @@ export default function SecuritySettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Security</h2>
-        <p className="text-sm text-muted-foreground">
-          Manage your account security settings
-        </p>
+        <h2 className="text-2xl font-semibold tracking-tight">{t.settings.security}</h2>
+        <p className="text-sm text-muted-foreground">{t.settings.manageSecurity}</p>
       </div>
 
       <Card>
@@ -57,10 +57,8 @@ export default function SecuritySettingsPage() {
           <div className="flex items-center gap-3">
             <Key className="h-5 w-5 text-muted-foreground" />
             <div>
-              <CardTitle>Change Password</CardTitle>
-              <CardDescription>
-                Update your password to keep your account secure
-              </CardDescription>
+              <CardTitle>{t.settings.changePassword}</CardTitle>
+              <CardDescription>{t.settings.updatePasswordDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -68,28 +66,28 @@ export default function SecuritySettingsPage() {
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="current-password" className="text-sm font-medium">
-                Current Password
+                {t.settings.currentPassword}
               </label>
               <Input
                 id="current-password"
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Enter current password"
+                placeholder={t.settings.enterCurrentPassword}
                 required
                 autoComplete="current-password"
               />
             </div>
             <div className="space-y-2">
               <label htmlFor="new-password" className="text-sm font-medium">
-                New Password
+                {t.settings.newPassword}
               </label>
               <Input
                 id="new-password"
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Min. 8 characters"
+                placeholder={t.auth.minChars}
                 required
                 minLength={8}
                 autoComplete="new-password"
@@ -97,7 +95,7 @@ export default function SecuritySettingsPage() {
             </div>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Update Password
+              {t.settings.updatePassword}
             </Button>
           </form>
         </CardContent>
@@ -108,23 +106,19 @@ export default function SecuritySettingsPage() {
           <div className="flex items-center gap-3">
             <Shield className="h-5 w-5 text-muted-foreground" />
             <div>
-              <CardTitle>Two-Factor Authentication</CardTitle>
-              <CardDescription>
-                Add an extra layer of security to your account
-              </CardDescription>
+              <CardTitle>{t.settings.twoFactor}</CardTitle>
+              <CardDescription>{t.settings.twoFactorDesc}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between rounded-lg border border-border p-4">
             <div>
-              <p className="text-sm font-medium">Authenticator App</p>
-              <p className="text-xs text-muted-foreground">
-                Use an authenticator app to generate one-time codes
-              </p>
+              <p className="text-sm font-medium">{t.settings.authenticatorApp}</p>
+              <p className="text-xs text-muted-foreground">{t.settings.authenticatorDesc}</p>
             </div>
             <Button variant="outline" size="sm" disabled>
-              Coming Soon
+              {t.settings.comingSoon}
             </Button>
           </div>
         </CardContent>

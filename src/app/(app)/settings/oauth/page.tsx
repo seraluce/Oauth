@@ -11,6 +11,7 @@ import {
   Badge,
 } from "@/components/ui/elements";
 import { useToast } from "@/components/providers/toast-provider";
+import { useTranslation } from "@/lib/i18n";
 import { Loader2, Link2, Unlink } from "lucide-react";
 
 interface OAuthBinding {
@@ -22,6 +23,7 @@ interface OAuthBinding {
 
 export default function OAuthSettingsPage() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [bindings, setBindings] = useState<OAuthBinding[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [connecting, setConnecting] = useState<string | null>(null);
@@ -57,7 +59,7 @@ export default function OAuthSettingsPage() {
       const data = await res.json();
       window.location.href = data.data.authUrl;
     } catch {
-      toast("Failed to initiate connection", "error");
+      toast(t.settings.failedToConnect, "error");
       setConnecting(null);
     }
   };
@@ -71,10 +73,10 @@ export default function OAuthSettingsPage() {
       });
 
       if (!res.ok) throw new Error("Failed to disconnect");
-      toast("Account disconnected", "success");
+      toast(t.settings.accountDisconnected, "success");
       fetchBindings();
     } catch {
-      toast("Failed to disconnect", "error");
+      toast(t.settings.failedToDisconnect, "error");
     }
   };
 
@@ -105,10 +107,8 @@ export default function OAuthSettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Connected Accounts</h2>
-        <p className="text-sm text-muted-foreground">
-          Link your account with third-party providers for easier sign-in
-        </p>
+        <h2 className="text-2xl font-semibold tracking-tight">{t.settings.connectedAccounts}</h2>
+        <p className="text-sm text-muted-foreground">{t.settings.linkAccounts}</p>
       </div>
 
       <Card>
@@ -116,10 +116,8 @@ export default function OAuthSettingsPage() {
           <div className="flex items-center gap-3">
             <Link2 className="h-5 w-5 text-muted-foreground" />
             <div>
-              <CardTitle>OAuth Providers</CardTitle>
-              <CardDescription>
-                Connect or disconnect your external accounts
-              </CardDescription>
+              <CardTitle>{t.settings.oauthProviders}</CardTitle>
+              <CardDescription>{t.settings.connectOrDisconnect}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -137,10 +135,10 @@ export default function OAuthSettingsPage() {
                     <p className="text-sm font-medium">{provider.label}</p>
                     {binding ? (
                       <Badge variant="secondary" className="mt-1">
-                        Connected
+                        {t.settings.connected}
                       </Badge>
                     ) : (
-                      <p className="text-xs text-muted-foreground">Not connected</p>
+                      <p className="text-xs text-muted-foreground">{t.settings.notConnected}</p>
                     )}
                   </div>
                 </div>
@@ -151,7 +149,7 @@ export default function OAuthSettingsPage() {
                     onClick={() => handleDisconnect(provider.name)}
                   >
                     <Unlink className="h-4 w-4" />
-                    Disconnect
+                    {t.settings.disconnect}
                   </Button>
                 ) : (
                   <Button
@@ -163,7 +161,7 @@ export default function OAuthSettingsPage() {
                     {connecting === provider.name && (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     )}
-                    Connect
+                    {t.settings.connect}
                   </Button>
                 )}
               </div>

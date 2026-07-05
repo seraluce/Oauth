@@ -12,6 +12,7 @@ import {
   CardContent,
 } from "@/components/ui/elements";
 import { useToast } from "@/components/providers/toast-provider";
+import { useTranslation } from "@/lib/i18n";
 import { ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 
 export function ForgotPasswordForm() {
@@ -19,6 +20,7 @@ export function ForgotPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -34,7 +36,7 @@ export function ForgotPasswordForm() {
       if (!res.ok) throw new Error("Failed to send reset code");
       setSent(true);
     } catch {
-      toast("Failed to send reset code", "error");
+      toast(t.auth.failedToSendReset, "error");
     } finally {
       setIsLoading(false);
     }
@@ -45,13 +47,18 @@ export function ForgotPasswordForm() {
       <Card className="w-full max-w-sm">
         <CardContent className="pt-6 text-center">
           <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
-          <h2 className="mt-4 text-lg font-semibold">Check your email</h2>
+          <h2 className="mt-4 text-lg font-semibold">{t.auth.checkEmail}</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            If an account exists with <strong>{email}</strong>, a reset code has been sent.
+            {t.auth.ifAccountExists.replace("{email}", email).split(email).length > 1
+              ? null
+              : null}
+            <span dangerouslySetInnerHTML={{
+              __html: t.auth.ifAccountExists.replace("{email}", `<strong>${email}</strong>`)
+            }} />
           </p>
           <div className="mt-6 space-y-3">
             <Link href={`/reset-password?email=${encodeURIComponent(email)}`}>
-              <Button className="w-full">Enter Reset Code</Button>
+              <Button className="w-full">{t.auth.enterResetCode}</Button>
             </Link>
             <Button
               variant="ghost"
@@ -60,7 +67,7 @@ export function ForgotPasswordForm() {
               className="w-full"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to email input
+              {t.auth.backToEmail}
             </Button>
           </div>
         </CardContent>
@@ -71,16 +78,14 @@ export function ForgotPasswordForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Forgot password</CardTitle>
-        <CardDescription>
-          Enter your email and we&apos;ll send you a reset code
-        </CardDescription>
+        <CardTitle className="text-2xl">{t.auth.resetPassword}</CardTitle>
+        <CardDescription>{t.auth.enterEmail}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t.auth.email}
             </label>
             <Input
               id="email"
@@ -94,7 +99,7 @@ export function ForgotPasswordForm() {
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Send reset code
+            {t.auth.sendResetCode}
           </Button>
         </form>
         <p className="mt-6 text-center">
@@ -103,7 +108,7 @@ export function ForgotPasswordForm() {
             className="text-sm text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="mr-1 inline h-3 w-3" />
-            Back to sign in
+            {t.auth.backToSignIn}
           </Link>
         </p>
       </CardContent>

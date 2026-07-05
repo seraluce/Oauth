@@ -12,11 +12,13 @@ import {
 } from "@/components/ui/elements";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useToast } from "@/components/providers/toast-provider";
+import { useTranslation } from "@/lib/i18n";
 import { Loader2, User } from "lucide-react";
 
 export default function ProfileSettingsPage() {
   const { user, refreshUser } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -43,9 +45,9 @@ export default function ProfileSettingsPage() {
 
       if (!res.ok) throw new Error("Update failed");
       await refreshUser();
-      toast("Profile updated", "success");
+      toast(t.settings.profileUpdated, "success");
     } catch {
-      toast("Failed to update profile", "error");
+      toast(t.settings.failedToUpdate, "error");
     } finally {
       setIsLoading(false);
     }
@@ -54,10 +56,8 @@ export default function ProfileSettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Profile</h2>
-        <p className="text-sm text-muted-foreground">
-          Manage your profile information
-        </p>
+        <h2 className="text-2xl font-semibold tracking-tight">{t.settings.profile}</h2>
+        <p className="text-sm text-muted-foreground">{t.settings.manageProfile}</p>
       </div>
 
       <Card>
@@ -65,11 +65,7 @@ export default function ProfileSettingsPage() {
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
               {user?.avatarUrl ? (
-                <img
-                  src={user.avatarUrl}
-                  alt=""
-                  className="h-12 w-12 rounded-full"
-                />
+                <img src={user.avatarUrl} alt="" className="h-12 w-12 rounded-full" />
               ) : (
                 <User className="h-6 w-6 text-muted-foreground" />
               )}
@@ -84,45 +80,32 @@ export default function ProfileSettingsPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="username" className="text-sm font-medium">
-                Username
+                {t.auth.username}
               </label>
-              <Input
-                id="username"
-                value={username}
-                disabled
-                className="bg-muted"
-              />
-              <p className="text-xs text-muted-foreground">
-                Username cannot be changed
-              </p>
+              <Input id="username" value={username} disabled className="bg-muted" />
+              <p className="text-xs text-muted-foreground">{t.settings.usernameCannotChange}</p>
             </div>
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                {t.auth.email}
               </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                disabled
-                className="bg-muted"
-              />
+              <Input id="email" type="email" value={email} disabled className="bg-muted" />
             </div>
             <div className="space-y-2">
               <label htmlFor="displayName" className="text-sm font-medium">
-                Display Name
+                {t.settings.displayName}
               </label>
               <Input
                 id="displayName"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Your display name"
+                placeholder={t.settings.yourDisplayName}
                 maxLength={50}
               />
             </div>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Save changes
+              {t.settings.saveChanges}
             </Button>
           </form>
         </CardContent>

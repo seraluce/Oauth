@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
+import { useTranslation } from "@/lib/i18n";
 import {
   LayoutDashboard,
   Users,
@@ -13,19 +14,20 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-const navItems = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/applications", label: "Applications", icon: AppWindow },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
-];
-
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { href: "/admin", label: t.admin.overview, icon: LayoutDashboard },
+    { href: "/admin/users", label: t.admin.users, icon: Users },
+    { href: "/admin/applications", label: t.admin.applications, icon: AppWindow },
+    { href: "/admin/settings", label: t.admin.settings, icon: Settings },
+  ];
 
   return (
     <div className="flex h-screen">
@@ -36,7 +38,7 @@ export default function AdminLayout({
             className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
+            {t.admin.back}
           </Link>
         </div>
         <nav className="flex-1 space-y-1 p-3">
@@ -65,7 +67,7 @@ export default function AdminLayout({
       </aside>
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex h-14 items-center justify-between border-b border-border px-6">
-          <h1 className="text-lg font-semibold">Admin Dashboard</h1>
+          <h1 className="text-lg font-semibold">{t.admin.title}</h1>
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <UserMenu />

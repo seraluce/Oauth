@@ -15,6 +15,7 @@ import {
 import { useAuth } from "@/components/providers/auth-provider";
 import { useToast } from "@/components/providers/toast-provider";
 import { OAuthButtons } from "./oauth-buttons";
+import { useTranslation } from "@/lib/i18n";
 import { Loader2 } from "lucide-react";
 
 export function LoginForm() {
@@ -24,6 +25,7 @@ export function LoginForm() {
   const { login } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -31,10 +33,10 @@ export function LoginForm() {
 
     try {
       await login(email, password);
-      toast("Logged in successfully", "success");
+      toast(t.auth.loggedIn, "success");
       router.push("/settings");
     } catch (err: any) {
-      toast(err.message || "Login failed", "error");
+      toast(err.message || t.auth.loginFailed, "error");
     } finally {
       setIsLoading(false);
     }
@@ -43,16 +45,14 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Sign in</CardTitle>
-        <CardDescription>
-          Enter your credentials to access your account
-        </CardDescription>
+        <CardTitle className="text-2xl">{t.auth.signIn}</CardTitle>
+        <CardDescription>{t.auth.enterCredentials}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t.auth.email}
             </label>
             <Input
               id="email"
@@ -67,19 +67,19 @@ export function LoginForm() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label htmlFor="password" className="text-sm font-medium">
-                Password
+                {t.auth.password}
               </label>
               <Link
                 href="/forgot-password"
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
-                Forgot password?
+                {t.auth.forgotPassword}
               </Link>
             </div>
             <Input
               id="password"
               type="password"
-              placeholder="Enter your password"
+              placeholder={t.auth.enterPassword}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -88,19 +88,19 @@ export function LoginForm() {
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Sign in
+            {t.auth.signIn}
           </Button>
         </form>
         <div className="my-6 flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
-          <span className="text-xs text-muted-foreground">or continue with</span>
+          <span className="text-xs text-muted-foreground">{t.common.orContinueWith}</span>
           <div className="h-px flex-1 bg-border" />
         </div>
         <OAuthButtons />
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
+          {t.auth.dontHaveAccount}{" "}
           <Link href="/register" className="font-medium text-foreground hover:underline">
-            Sign up
+            {t.auth.signUp}
           </Link>
         </p>
       </CardContent>

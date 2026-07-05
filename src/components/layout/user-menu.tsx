@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useTranslation } from "@/lib/i18n";
 import { LogOut, User, ChevronDown } from "lucide-react";
 
 export function UserMenu() {
@@ -10,6 +11,7 @@ export function UserMenu() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -49,7 +51,7 @@ export function UserMenu() {
             className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-destructive hover:bg-accent transition-colors"
           >
             <LogOut className="h-4 w-4" />
-            Sign out
+            {t.auth.signOut}
           </button>
         </div>
       )}

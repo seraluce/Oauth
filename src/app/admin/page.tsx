@@ -7,6 +7,7 @@ import {
   CardTitle,
   CardContent,
 } from "@/components/ui/elements";
+import { useTranslation } from "@/lib/i18n";
 import { Users, UserCheck, Shield, Activity } from "lucide-react";
 import { formatDateTime } from "@/lib/utils/helpers";
 
@@ -21,6 +22,7 @@ interface Stats {
 export default function AdminOverviewPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -48,14 +50,14 @@ export default function AdminOverviewPage() {
   }
 
   if (!stats) {
-    return <p className="text-muted-foreground">Failed to load statistics</p>;
+    return <p className="text-muted-foreground">{t.admin.failedToLoad}</p>;
   }
 
   const statCards = [
-    { label: "Total Users", value: stats.totalUsers, icon: Users },
-    { label: "Active Users", value: stats.activeUsers, icon: UserCheck },
-    { label: "Admins", value: stats.adminUsers, icon: Shield },
-    { label: "Recent Activity", value: stats.recentActivity.length, icon: Activity },
+    { label: t.admin.totalUsers, value: stats.totalUsers, icon: Users },
+    { label: t.admin.activeUsers, value: stats.activeUsers, icon: UserCheck },
+    { label: t.admin.admins, value: stats.adminUsers, icon: Shield },
+    { label: t.admin.recentActivity, value: stats.recentActivity.length, icon: Activity },
   ];
 
   return (
@@ -79,7 +81,7 @@ export default function AdminOverviewPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Recent Users</CardTitle>
+            <CardTitle>{t.admin.recentUsers}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -109,7 +111,7 @@ export default function AdminOverviewPage() {
                 </div>
               ))}
               {stats.recentUsers.length === 0 && (
-                <p className="text-sm text-muted-foreground">No users yet</p>
+                <p className="text-sm text-muted-foreground">{t.admin.noUsers}</p>
               )}
             </div>
           </CardContent>
@@ -117,7 +119,7 @@ export default function AdminOverviewPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>{t.admin.recentActivity}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -129,7 +131,7 @@ export default function AdminOverviewPage() {
                   <div>
                     <p className="text-sm font-medium">{log.action}</p>
                     <p className="text-xs text-muted-foreground">
-                      User: {log.userId || "System"}
+                      {t.admin.user}: {log.userId || "System"}
                     </p>
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -138,7 +140,7 @@ export default function AdminOverviewPage() {
                 </div>
               ))}
               {stats.recentActivity.length === 0 && (
-                <p className="text-sm text-muted-foreground">No activity yet</p>
+                <p className="text-sm text-muted-foreground">{t.admin.noActivity}</p>
               )}
             </div>
           </CardContent>

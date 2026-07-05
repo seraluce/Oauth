@@ -11,12 +11,14 @@ import {
 } from "@/components/ui/elements";
 import { useToast } from "@/components/providers/toast-provider";
 import { useTheme } from "next-themes";
+import { useTranslation, useLocale } from "@/lib/i18n";
 import { Loader2, Palette } from "lucide-react";
 
 export default function PreferencesSettingsPage() {
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
-  const [locale, setLocale] = useState("en");
+  const { locale, setLocale } = useLocale();
+  const { t } = useTranslation();
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -30,7 +32,6 @@ export default function PreferencesSettingsPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.data) {
-            setLocale(data.data.locale || "en");
             setEmailNotifications(data.data.emailNotifications ?? true);
           }
         }
@@ -40,6 +41,10 @@ export default function PreferencesSettingsPage() {
     };
     fetchSettings();
   }, []);
+
+  const handleLocaleChange = (newLocale: string) => {
+    setLocale(newLocale as "en" | "zh" | "ja");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,9 +58,9 @@ export default function PreferencesSettingsPage() {
       });
 
       if (!res.ok) throw new Error("Failed");
-      toast("Preferences updated", "success");
+      toast(t.settings.preferencesUpdated, "success");
     } catch {
-      toast("Failed to update preferences", "error");
+      toast(t.settings.failedToUpdatePrefs, "error");
     } finally {
       setIsLoading(false);
     }
@@ -64,10 +69,8 @@ export default function PreferencesSettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Preferences</h2>
-        <p className="text-sm text-muted-foreground">
-          Customize your experience
-        </p>
+        <h2 className="text-2xl font-semibold tracking-tight">{t.settings.preferences}</h2>
+        <p className="text-sm text-muted-foreground">{t.settings.managePreferences}</p>
       </div>
 
       <Card>
@@ -75,26 +78,24 @@ export default function PreferencesSettingsPage() {
           <div className="flex items-center gap-3">
             <Palette className="h-5 w-5 text-muted-foreground" />
             <div>
-              <CardTitle>Appearance</CardTitle>
-              <CardDescription>
-                Choose your preferred theme
-              </CardDescription>
+              <CardTitle>{t.settings.appearance}</CardTitle>
+              <CardDescription>{t.settings.chooseTheme}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-3">
-            {(["light", "dark", "system"] as const).map((t) => (
+            {(["light", "dark", "system"] as const).map((th) => (
               <button
-                key={t}
-                onClick={() => setTheme(t)}
+                key={th}
+                onClick={() => setTheme(th)}
                 className={`rounded-lg border p-4 text-center text-sm font-medium transition-colors ${
-                  (mounted ? theme === t : t === "system")
+                  (mounted ? theme === th : th === "system")
                     ? "border-foreground bg-accent"
                     : "border-border hover:bg-accent"
                 }`}
               >
-                {t.charAt(0).toUpperCase() + t.slice(1)}
+                {th === "light" ? t.settings.light : th === "dark" ? t.settings.dark : t.settings.system}
               </button>
             ))}
           </div>
@@ -103,19 +104,15 @@ export default function PreferencesSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Notifications</CardTitle>
-          <CardDescription>
-            Configure how you receive notifications
-          </CardDescription>
+          <CardTitle>{t.settings.notifications}</CardTitle>
+          <CardDescription>{t.settings.notificationsDesc}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center justify-between rounded-lg border border-border p-4">
               <div>
-                <p className="text-sm font-medium">Email Notifications</p>
-                <p className="text-xs text-muted-foreground">
-                  Receive email notifications for important account activity
-                </p>
+                <p className="text-sm font-medium">{t.settings.emailNotifications}</p>
+                <p className="text-xs text-muted-foreground">{t.settings.emailNotificationsDesc}</p>
               </div>
               <button
                 type="button"
@@ -134,23 +131,23 @@ export default function PreferencesSettingsPage() {
 
             <div className="space-y-2">
               <label htmlFor="locale" className="text-sm font-medium">
-                Language
+                {t.settings.language}
               </label>
               <select
                 id="locale"
                 value={locale}
-                onChange={(e) => setLocale(e.target.value)}
+                onChange={(e) => handleLocaleChange(e.target.value)}
                 className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="en">English</option>
-                <option value="zh">Chinese</option>
-                <option value="ja">Japanese</option>
+                <option value="zh">中文</option>
+                <option value="ja">日本語</option>
               </select>
             </div>
 
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Save preferences
+              {t.settings.savePreferences}
             </Button>
           </form>
         </CardContent>

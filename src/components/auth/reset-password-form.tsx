@@ -13,6 +13,7 @@ import {
   CardContent,
 } from "@/components/ui/elements";
 import { useToast } from "@/components/providers/toast-provider";
+import { useTranslation } from "@/lib/i18n";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
 export function ResetPasswordForm() {
@@ -25,6 +26,7 @@ export function ResetPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -38,12 +40,12 @@ export function ResetPasswordForm() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || "Reset failed");
+      if (!res.ok) throw new Error(data.error?.message || t.auth.resetFailed);
 
-      toast("Password reset successfully", "success");
+      toast(t.auth.passwordReset, "success");
       router.push("/login");
     } catch (err: any) {
-      toast(err.message || "Reset failed", "error");
+      toast(err.message || t.auth.resetFailed, "error");
     } finally {
       setIsLoading(false);
     }
@@ -52,16 +54,14 @@ export function ResetPasswordForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Reset password</CardTitle>
-        <CardDescription>
-          Enter the code sent to your email and a new password
-        </CardDescription>
+        <CardTitle className="text-2xl">{t.auth.resetPassword}</CardTitle>
+        <CardDescription>{t.auth.enterCodeAndNew}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t.auth.email}
             </label>
             <Input
               id="email"
@@ -75,12 +75,12 @@ export function ResetPasswordForm() {
           </div>
           <div className="space-y-2">
             <label htmlFor="code" className="text-sm font-medium">
-              Reset Code
+              {t.auth.resetCode}
             </label>
             <Input
               id="code"
               type="text"
-              placeholder="6-digit code"
+              placeholder={t.auth.sixDigitCode}
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               required
@@ -89,12 +89,12 @@ export function ResetPasswordForm() {
           </div>
           <div className="space-y-2">
             <label htmlFor="new-password" className="text-sm font-medium">
-              New Password
+              {t.auth.password === "密码" ? "新密码" : t.settings.newPassword}
             </label>
             <Input
               id="new-password"
               type="password"
-              placeholder="Min. 8 characters"
+              placeholder={t.auth.minChars}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -104,7 +104,7 @@ export function ResetPasswordForm() {
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Reset password
+            {t.auth.resetPassword}
           </Button>
         </form>
         <p className="mt-6 text-center">
@@ -113,7 +113,7 @@ export function ResetPasswordForm() {
             className="text-sm text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="mr-1 inline h-3 w-3" />
-            Back to sign in
+            {t.auth.backToSignIn}
           </Link>
         </p>
       </CardContent>

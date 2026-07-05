@@ -3,11 +3,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  Badge,
-} from "@/components/ui/elements";
+import { Card, CardContent, Badge } from "@/components/ui/elements";
+import { useTranslation } from "@/lib/i18n";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDate } from "@/lib/utils/helpers";
 
@@ -23,6 +20,7 @@ interface User {
 }
 
 export default function AdminUsersPage() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -88,15 +86,15 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Users</h2>
+          <h2 className="text-2xl font-semibold tracking-tight">{t.admin.users}</h2>
           <p className="text-sm text-muted-foreground">
-            Manage user accounts ({total} total)
+            {t.admin.manageUsers.replace("{total}", String(total))}
           </p>
         </div>
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search users..."
+            placeholder={t.common.search}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -120,11 +118,11 @@ export default function AdminUsersPage() {
                   <thead>
                     <tr className="border-b border-border">
                       <th className="pb-3 text-left font-medium text-muted-foreground">ID</th>
-                      <th className="pb-3 text-left font-medium text-muted-foreground">User</th>
-                      <th className="pb-3 text-left font-medium text-muted-foreground">Role</th>
-                      <th className="pb-3 text-left font-medium text-muted-foreground">Status</th>
-                      <th className="pb-3 text-left font-medium text-muted-foreground">Joined</th>
-                      <th className="pb-3 text-left font-medium text-muted-foreground">Actions</th>
+                      <th className="pb-3 text-left font-medium text-muted-foreground">{t.admin.user}</th>
+                      <th className="pb-3 text-left font-medium text-muted-foreground">{t.admin.role}</th>
+                      <th className="pb-3 text-left font-medium text-muted-foreground">{t.admin.status}</th>
+                      <th className="pb-3 text-left font-medium text-muted-foreground">{t.admin.joined}</th>
+                      <th className="pb-3 text-left font-medium text-muted-foreground">{t.admin.actions}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -143,8 +141,8 @@ export default function AdminUsersPage() {
                             onChange={(e) => handleRoleChange(user.id, e.target.value)}
                             className="rounded border border-border bg-transparent px-2 py-1 text-xs"
                           >
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
+                            <option value="user">{t.admin.user}</option>
+                            <option value="admin">{t.admin.admins}</option>
                           </select>
                         </td>
                         <td className="py-3">
@@ -157,7 +155,7 @@ export default function AdminUsersPage() {
                                   : "secondary"
                             }
                           >
-                            {user.status}
+                            {user.status === "active" ? t.admin.active : user.status === "suspended" ? t.admin.suspended : t.admin.locked}
                           </Badge>
                         </td>
                         <td className="py-3 text-muted-foreground">
@@ -169,9 +167,9 @@ export default function AdminUsersPage() {
                             onChange={(e) => handleStatusChange(user.id, e.target.value)}
                             className="rounded border border-border bg-transparent px-2 py-1 text-xs"
                           >
-                            <option value="active">Active</option>
-                            <option value="suspended">Suspended</option>
-                            <option value="locked">Locked</option>
+                            <option value="active">{t.admin.active}</option>
+                            <option value="suspended">{t.admin.suspended}</option>
+                            <option value="locked">{t.admin.locked}</option>
                           </select>
                         </td>
                       </tr>
@@ -183,23 +181,13 @@ export default function AdminUsersPage() {
               {totalPages > 1 && (
                 <div className="mt-4 flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
-                    Page {page} of {totalPages}
+                    {t.admin.page.replace("{page}", String(page)).replace("{total}", String(totalPages))}
                   </p>
                   <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>

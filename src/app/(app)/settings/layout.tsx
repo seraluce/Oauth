@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils/cn";
 import { useAuth } from "@/components/providers/auth-provider";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
+import { useTranslation } from "@/lib/i18n";
 import {
   Settings,
   Shield,
@@ -15,22 +16,23 @@ import {
   LogOut,
 } from "lucide-react";
 
-const navItems = [
-  { href: "/settings", label: "Profile", icon: Settings },
-  { href: "/settings/security", label: "Security", icon: Shield },
-  { href: "/settings/oauth", label: "Connected Accounts", icon: Link2 },
-  { href: "/settings/preferences", label: "Preferences", icon: Palette },
-];
-
 export function AppSidebar() {
   const pathname = usePathname();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { href: "/settings", label: t.settings.profile, icon: Settings },
+    { href: "/settings/security", label: t.settings.security, icon: Shield },
+    { href: "/settings/oauth", label: t.settings.connectedAccounts, icon: Link2 },
+    { href: "/settings/preferences", label: t.settings.preferences, icon: Palette },
+  ];
 
   return (
     <aside className="flex h-full w-56 shrink-0 flex-col border-r border-border bg-card">
       <div className="flex h-14 items-center border-b border-border px-4">
         <Link href="/settings" className="flex items-center gap-2 font-semibold">
           <Key className="h-5 w-5" />
-          Settings
+          {t.settings.title}
         </Link>
       </div>
       <nav className="flex-1 space-y-1 p-3">
@@ -62,7 +64,7 @@ export function AppSidebar() {
           className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         >
           <Shield className="h-4 w-4" />
-          Admin Dashboard
+          {t.settings.adminDashboard}
         </Link>
       </div>
     </aside>
@@ -70,9 +72,10 @@ export function AppSidebar() {
 }
 
 export function TopBar() {
+  const { t } = useTranslation();
   return (
     <header className="flex h-14 items-center justify-between border-b border-border px-6">
-      <h1 className="text-lg font-semibold">Settings</h1>
+      <h1 className="text-lg font-semibold">{t.settings.title}</h1>
       <div className="flex items-center gap-3">
         <ThemeToggle />
         <UserMenu />
