@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
     return errorResponse("INVALID_TOKEN", "Invalid or expired token", 401);
   }
 
-  const db = getDb();
-  const user = db
+  const db = await getDb();
+  const user = await db
     .select({
       id: users.id,
       username: users.username,

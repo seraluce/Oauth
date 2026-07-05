@@ -13,11 +13,11 @@ export async function createAuthorizationCode(
   codeChallenge?: string,
   codeChallengeMethod?: string
 ): Promise<string> {
-  const db = getDb();
+  const db = await getDb();
   const code = generateToken();
   const expiresAt = new Date(Date.now() + AUTH_CODE_EXPIRY);
 
-  db.insert(ssoAuthorizationCodes)
+  await db.insert(ssoAuthorizationCodes)
     .values({
       applicationId,
       userId,
@@ -28,8 +28,7 @@ export async function createAuthorizationCode(
       codeChallengeMethod: codeChallengeMethod || null,
       expiresAt,
       createdAt: new Date(),
-    })
-    .run();
+    });
 
   return code;
 }
@@ -40,8 +39,8 @@ export async function consumeAuthorizationCode(
   redirectUri: string,
   codeVerifier?: string
 ): Promise<{ userId: number; scope: string } | null> {
-  const db = getDb();
-  const authCode = db
+  const db = await getDb();
+  const authCode = await db
     .select()
     .from(ssoAuthorizationCodes)
     .where(
@@ -70,10 +69,9 @@ export async function consumeAuthorizationCode(
     if (expected !== authCode.codeChallenge) return null;
   }
 
-  db.update(ssoAuthorizationCodes)
+  await db.update(ssoAuthorizationCodes)
     .set({ usedAt: new Date() })
-    .where(eq(ssoAuthorizationCodes.id, authCode.id))
-    .run();
+    .where(eq(ssoAuthorizationCodes.id, authCode.id));
 
   return { userId: authCode.userId, scope: authCode.scope };
 }

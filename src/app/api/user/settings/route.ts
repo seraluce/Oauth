@@ -10,8 +10,8 @@ export async function GET(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof Response) return auth;
 
-  const db = getDb();
-  const settings = db
+  const db = await getDb();
+  const settings = await db
     .select()
     .from(userSettings)
     .where(eq(userSettings.userId, auth.userId))
@@ -42,20 +42,19 @@ export async function PATCH(req: NextRequest) {
     return errorResponse("VALIDATION_ERROR", "Invalid input", 400, parsed.error.issues);
   }
 
-  const db = getDb();
-  const existing = db
+  const db = await getDb();
+  const existing = await db
     .select()
     .from(userSettings)
     .where(eq(userSettings.userId, auth.userId))
     .get();
 
   if (existing) {
-    db.update(userSettings)
+    await db.update(userSettings)
       .set({ ...parsed.data, updatedAt: new Date() })
-      .where(eq(userSettings.userId, auth.userId))
-      .run();
+      .where(eq(userSettings.userId, auth.userId));
   } else {
-    db.insert(userSettings)
+    await db.insert(userSettings)
       .values({
         userId: auth.userId,
         theme: parsed.data.theme || "system",
@@ -63,8 +62,7 @@ export async function PATCH(req: NextRequest) {
         twoFactorEnabled: false,
         emailNotifications: parsed.data.emailNotifications ?? true,
         updatedAt: new Date(),
-      })
-      .run();
+      });
   }
 
   return successResponse({ message: "Settings updated" });

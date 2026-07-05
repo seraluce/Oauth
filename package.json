@@ -8,10 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "pages:build": "npx @opennextjs/cloudflare build",
-    "pages:deploy": "npm run pages:build && wrangler pages deploy .vercel/output/static",
+    "pages:deploy": "npm run pages:build && wrangler pages deploy .open-next",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit push",
+    "db:migrate:d1": "wrangler d1 execute sso-auth-db --local --file=./drizzle/0000_init.sql",
     "db:seed": "npx tsx src/lib/db/seed.ts",
+    "db:seed:d1": "wrangler d1 execute sso-auth-db --local --file=./drizzle/seed.sql",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {

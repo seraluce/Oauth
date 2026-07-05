@@ -7,41 +7,39 @@ const LOCKOUT_DURATION =
   parseInt(process.env.LOCKOUT_DURATION_MINUTES || "15", 10) * 60 * 1000;
 
 export async function recordFailedLogin(userId: number): Promise<void> {
-  const db = getDb();
-  const user = db.select().from(users).where(eq(users.id, userId)).get();
+  const db = await getDb();
+  const user = await db.select().from(users).where(eq(users.id, userId)).get();
   if (!user) return;
 
   const attempts = user.failedLoginAttempts + 1;
   const lockedUntil =
     attempts >= MAX_ATTEMPTS ? new Date(Date.now() + LOCKOUT_DURATION) : null;
 
-  db.update(users)
+  await db.update(users)
     .set({
       failedLoginAttempts: attempts,
       lockedUntil,
       status: lockedUntil ? "locked" : user.status,
       updatedAt: new Date(),
     })
-    .where(eq(users.id, userId))
-    .run();
+    .where(eq(users.id, userId));
 }
 
 export async function resetFailedLogin(userId: number): Promise<void> {
-  const db = getDb();
-  db.update(users)
+  const db = await getDb();
+  await db.update(users)
     .set({
       failedLoginAttempts: 0,
       lockedUntil: null,
       status: "active",
       updatedAt: new Date(),
     })
-    .where(eq(users.id, userId))
-    .run();
+    .where(eq(users.id, userId));
 }
 
 export async function isAccountLocked(userId: number): Promise<boolean> {
-  const db = getDb();
-  const user = db
+  const db = await getDb();
+  const user = await db
     .select({ lockedUntil: users.lockedUntil })
     .from(users)
     .where(eq(users.id, userId))

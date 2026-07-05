@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
     return errorResponse("VALIDATION_ERROR", "Provider required", 400);
   }
 
-  const db = getDb();
-  const binding = db
+  const db = await getDb();
+  const binding = await db
     .select()
     .from(oauthAccounts)
     .where(
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     return errorResponse("NOT_FOUND", "OAuth binding not found", 404);
   }
 
-  db.delete(oauthAccounts).where(eq(oauthAccounts.id, binding.id)).run();
+  await db.delete(oauthAccounts).where(eq(oauthAccounts.id, binding.id));
 
   return successResponse({ message: "OAuth account disconnected" });
 }

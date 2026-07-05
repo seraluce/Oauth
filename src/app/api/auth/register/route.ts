@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
   const email = sanitizeEmail(rawEmail);
   const cleanUsername = sanitizeInput(username);
 
-  const db = getDb();
+  const db = await getDb();
 
-  const codeRecord = db
+  const codeRecord = await db
     .select()
     .from(verificationCodes)
     .where(
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     return errorResponse("CODE_EXPIRED", "Verification code expired", 400);
   }
 
-  const existingUser = db
+  const existingUser = await db
     .select()
     .from(users)
     .where(eq(users.email, email))
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const existingUsername = db
+  const existingUsername = await db
     .select()
     .from(users)
     .where(eq(users.username, cleanUsername))
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
   const userId = await getNextUserId();
   const now = new Date();
 
-  db.insert(users)
+  await db.insert(users)
     .values({
       id: userId,
       username: cleanUsername,
@@ -103,10 +103,9 @@ export async function POST(req: NextRequest) {
       failedLoginAttempts: 0,
       createdAt: now,
       updatedAt: now,
-    })
-    .run();
+    });
 
-  db.insert(userSettings)
+  await db.insert(userSettings)
     .values({
       userId,
       theme: "system",
@@ -114,13 +113,11 @@ export async function POST(req: NextRequest) {
       twoFactorEnabled: false,
       emailNotifications: true,
       updatedAt: now,
-    })
-    .run();
+    });
 
-  db.update(verificationCodes)
+  await db.update(verificationCodes)
     .set({ usedAt: now })
-    .where(eq(verificationCodes.id, codeRecord.id))
-    .run();
+    .where(eq(verificationCodes.id, codeRecord.id));
 
   await logAuditEvent(userId, "register", ctx.ipAddress, ctx.userAgent);
 

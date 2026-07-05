@@ -14,9 +14,9 @@ export async function issueTokens(
   refreshToken: string;
   expiresIn: number;
 }> {
-  const db = getDb();
+  const db = await getDb();
 
-  const user = db
+  const user = await db
     .select({ role: users.role })
     .from(users)
     .where(eq(users.id, userId))
@@ -35,15 +35,14 @@ export async function issueTokens(
   const refreshTokenValue = generateToken();
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY * 1000);
 
-  db.insert(refreshTokens)
+  await db.insert(refreshTokens)
     .values({
       userId,
       applicationId,
       token: refreshTokenValue,
       expiresAt,
       createdAt: new Date(),
-    })
-    .run();
+    });
 
   return {
     accessToken,
@@ -60,20 +59,9 @@ export async function refreshAccessToken(
   refreshToken: string;
   expiresIn: number;
 } | null> {
-  const db = getDb();
+  const db = await getDb();
 
-  const token = db
-    .select()
-    .from(refreshTokens)
-    .where(
-      and(
-        eq(refreshTokens.token, refreshTokenValue),
-        eq(refreshTokens.userId, 0)
-      )
-    )
-    .get();
-
-  const existingToken = db
+  const existingToken = await db
     .select()
     .from(refreshTokens)
     .where(eq(refreshTokens.token, refreshTokenValue))
@@ -85,10 +73,9 @@ export async function refreshAccessToken(
   if (applicationId !== null && existingToken.applicationId !== applicationId)
     return null;
 
-  db.update(refreshTokens)
+  await db.update(refreshTokens)
     .set({ revokedAt: new Date() })
-    .where(eq(refreshTokens.id, existingToken.id))
-    .run();
+    .where(eq(refreshTokens.id, existingToken.id));
 
   return issueTokens(
     existingToken.userId,
@@ -98,9 +85,8 @@ export async function refreshAccessToken(
 }
 
 export async function revokeToken(tokenValue: string): Promise<void> {
-  const db = getDb();
-  db.update(refreshTokens)
+  const db = await getDb();
+  await db.update(refreshTokens)
     .set({ revokedAt: new Date() })
-    .where(eq(refreshTokens.token, tokenValue))
-    .run();
+    .where(eq(refreshTokens.token, tokenValue));
 }

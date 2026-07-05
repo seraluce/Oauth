@@ -92,8 +92,8 @@ export async function logAuditEvent(
   userAgent: string,
   details?: Record<string, unknown>
 ): Promise<void> {
-  const db = getDb();
-  db.insert(auditLogs)
+  const db = await getDb();
+  await db.insert(auditLogs)
     .values({
       userId,
       action,
@@ -101,6 +101,5 @@ export async function logAuditEvent(
       userAgent,
       details: details ? JSON.stringify(details) : null,
       createdAt: new Date(),
-    })
-    .run();
+    });
 }

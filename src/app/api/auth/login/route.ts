@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
   const { email: rawEmail, password } = parsed.data;
   const email = sanitizeEmail(rawEmail);
 
-  const db = getDb();
-  const user = db
+  const db = await getDb();
+  const user = await db
     .select()
     .from(users)
     .where(eq(users.email, email))
@@ -84,10 +84,9 @@ export async function POST(req: NextRequest) {
     ctx.userAgent
   );
 
-  db.update(users)
+  await db.update(users)
     .set({ lastLoginAt: new Date(), updatedAt: new Date() })
-    .where(eq(users.id, user.id))
-    .run();
+    .where(eq(users.id, user.id));
 
   await logAuditEvent(user.id, "login", ctx.ipAddress, ctx.userAgent);
 

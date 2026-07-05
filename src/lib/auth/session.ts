@@ -2,7 +2,7 @@ import { getDb } from "@/lib/db";
 import { sessions, users } from "@/lib/db/schema";
 import { eq, and, gt } from "drizzle-orm";
 import { generateSessionId, generateToken } from "./id-generator";
-import { signJwt, verifyJwt, type JwtPayload } from "./jwt";
+import { signJwt, type JwtPayload } from "./jwt";
 
 const SESSION_DURATION = 60 * 60 * 24 * 30; // 30 days
 const ACCESS_TOKEN_DURATION = 900; // 15 minutes
@@ -12,12 +12,12 @@ export async function createSession(
   ipAddress: string | null,
   userAgent: string | null
 ): Promise<{ sessionId: string; token: string; accessToken: string }> {
-  const db = getDb();
+  const db = await getDb();
   const sessionId = generateSessionId();
   const token = generateToken();
   const expiresAt = new Date(Date.now() + SESSION_DURATION * 1000);
 
-  db.insert(sessions)
+  await db.insert(sessions)
     .values({
       id: sessionId,
       userId,
@@ -26,8 +26,7 @@ export async function createSession(
       ipAddress,
       userAgent,
       createdAt: new Date(),
-    })
-    .run();
+    });
 
   const accessToken = await signJwt(
     {
@@ -45,8 +44,8 @@ export async function createSession(
 export async function validateSession(
   sessionId: string
 ): Promise<{ userId: number; role: string } | null> {
-  const db = getDb();
-  const session = db
+  const db = await getDb();
+  const session = await db
     .select()
     .from(sessions)
     .where(and(eq(sessions.id, sessionId), gt(sessions.expiresAt, new Date())))
@@ -54,7 +53,7 @@ export async function validateSession(
 
   if (!session) return null;
 
-  const user = db
+  const user = await db
     .select({ role: users.role, status: users.status })
     .from(users)
     .where(eq(users.id, session.userId))
@@ -66,18 +65,18 @@ export async function validateSession(
 }
 
 export async function destroySession(sessionId: string): Promise<void> {
-  const db = getDb();
-  db.delete(sessions).where(eq(sessions.id, sessionId)).run();
+  const db = await getDb();
+  await db.delete(sessions).where(eq(sessions.id, sessionId));
 }
 
 export async function destroyUserSessions(userId: number): Promise<void> {
-  const db = getDb();
-  db.delete(sessions).where(eq(sessions.userId, userId)).run();
+  const db = await getDb();
+  await db.delete(sessions).where(eq(sessions.userId, userId));
 }
 
 export async function getUserSessions(userId: number) {
-  const db = getDb();
-  return db
+  const db = await getDb();
+  return await db
     .select()
     .from(sessions)
     .where(eq(sessions.userId, userId))

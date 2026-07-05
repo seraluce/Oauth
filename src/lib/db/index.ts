@@ -1,21 +1,35 @@
-import { drizzle as drizzleSqlite, BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
 import * as schema from "./schema";
 
-let _db: BetterSQLite3Database<typeof schema> | null = null;
+type DbInstance = any;
 
-export function getDb() {
-  if (_db) return _db;
+let _db: DbInstance = null;
+let _driver: string | null = null;
 
-  const dbUrl = process.env.DATABASE_URL || "file:./local.db";
-  const dbPath = dbUrl.replace("file:", "");
+export async function getDb(): Promise<DbInstance> {
+  const driver = process.env.DB_DRIVER || "sqlite";
 
-  const sqlite = new Database(dbPath);
-  sqlite.pragma("journal_mode = WAL");
-  sqlite.pragma("foreign_keys = ON");
+  if (_db && _driver === driver) return _db;
 
-  _db = drizzleSqlite(sqlite, { schema });
+  if (driver === "d1") {
+    const [{ getCloudflareContext }, { drizzle: drizzleD1 }] = await Promise.all([
+      import("@opennextjs/cloudflare" as string),
+      import("drizzle-orm/d1" as string),
+    ]);
+    const { env } = getCloudflareContext();
+    _db = drizzleD1(env.DB, { schema });
+  } else {
+    const [{ default: Database }, { drizzle: drizzleSqlite }] = await Promise.all([
+      import("better-sqlite3" as string),
+      import("drizzle-orm/better-sqlite3" as string),
+    ]);
+    const dbUrl = process.env.DATABASE_URL || "file:./local.db";
+    const dbPath = dbUrl.replace("file:", "");
+    const sqlite = new Database(dbPath);
+    sqlite.pragma("journal_mode = WAL");
+    sqlite.pragma("foreign_keys = ON");
+    _db = drizzleSqlite(sqlite, { schema });
+  }
+
+  _driver = driver;
   return _db;
 }
-
-export type Database = BetterSQLite3Database<typeof schema>;

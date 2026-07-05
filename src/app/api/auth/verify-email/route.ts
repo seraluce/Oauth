@@ -28,9 +28,9 @@ export async function POST(req: NextRequest) {
   const { email: rawEmail, code } = parsed.data;
   const email = sanitizeEmail(rawEmail);
 
-  const db = getDb();
+  const db = await getDb();
 
-  const codeRecord = db
+  const codeRecord = await db
     .select()
     .from(verificationCodes)
     .where(
@@ -46,22 +46,20 @@ export async function POST(req: NextRequest) {
     return errorResponse("INVALID_CODE", "Invalid or expired verification code", 400);
   }
 
-  const user = db.select().from(users).where(eq(users.email, email)).get();
+  const user = await db.select().from(users).where(eq(users.email, email)).get();
   if (!user) {
     return errorResponse("INVALID_CODE", "Invalid or expired verification code", 400);
   }
 
   const now = new Date();
 
-  db.update(users)
+  await db.update(users)
     .set({ emailVerifiedAt: now, updatedAt: now })
-    .where(eq(users.id, user.id))
-    .run();
+    .where(eq(users.id, user.id));
 
-  db.update(verificationCodes)
+  await db.update(verificationCodes)
     .set({ usedAt: now })
-    .where(eq(verificationCodes.id, codeRecord.id))
-    .run();
+    .where(eq(verificationCodes.id, codeRecord.id));
 
   await logAuditEvent(user.id, "email_verified", ctx.ipAddress, ctx.userAgent);
 

@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof Response) return auth;
 
-  const apps = await getUserApplications(auth.userId);
+  const apps: any[] = await getUserApplications(auth.userId);
   return successResponse(
     apps.map((app) => ({
       id: app.id,

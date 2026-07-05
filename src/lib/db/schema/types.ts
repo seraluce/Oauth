@@ -1,5 +1,3 @@
-import type { DbDriver } from "../dialect";
-
 export interface UserRecord {
   id: number;
   username: string;

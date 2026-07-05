@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
     return errorResponse("VALIDATION_ERROR", "Invalid input", 400, parsed.error.issues);
   }
 
-  const db = getDb();
-  const user = db.select().from(users).where(eq(users.id, auth.userId)).get();
+  const db = await getDb();
+  const user = await db.select().from(users).where(eq(users.id, auth.userId)).get();
 
   if (!user) {
     return errorResponse("NOT_FOUND", "User not found", 404);
@@ -37,10 +37,9 @@ export async function POST(req: NextRequest) {
   }
 
   const newPasswordHash = await hashPassword(parsed.data.newPassword);
-  db.update(users)
+  await db.update(users)
     .set({ passwordHash: newPasswordHash, updatedAt: new Date() })
-    .where(eq(users.id, auth.userId))
-    .run();
+    .where(eq(users.id, auth.userId));
 
   await logAuditEvent(auth.userId, "password_change", ctx.ipAddress, ctx.userAgent);
 

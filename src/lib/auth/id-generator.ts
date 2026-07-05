@@ -24,26 +24,23 @@ export function generateClientSecret(): string {
 }
 
 export async function getNextUserId(): Promise<number> {
-  const db = getDb();
-  const seq = db
+  const db = await getDb();
+  const seq = await db
     .select()
     .from(idSequence)
     .where(eq(idSequence.name, "user_id"))
     .get();
 
   if (!seq) {
-    const now = new Date();
-    db.insert(idSequence)
-      .values({ name: "user_id", currentValue: 12000 })
-      .run();
+    await db.insert(idSequence)
+      .values({ name: "user_id", currentValue: 12000 });
     return 12000;
   }
 
   const nextValue = seq.currentValue + 1;
-  db.update(idSequence)
+  await db.update(idSequence)
     .set({ currentValue: nextValue })
-    .where(eq(idSequence.name, "user_id"))
-    .run();
+    .where(eq(idSequence.name, "user_id"));
 
   return nextValue;
 }

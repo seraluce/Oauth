@@ -22,8 +22,8 @@ export async function PATCH(
     return errorResponse("INVALID_JSON", "Invalid request body", 400);
   }
 
-  const db = getDb();
-  const app = db
+  const db = await getDb();
+  const app = await db
     .select()
     .from(ssoApplications)
     .where(and(eq(ssoApplications.id, appId), eq(ssoApplications.ownerUserId, auth.userId)))
@@ -40,10 +40,9 @@ export async function PATCH(
   if (body.scopes) updates.scopes = body.scopes;
   if (body.isActive !== undefined) updates.isActive = body.isActive;
 
-  db.update(ssoApplications)
+  await db.update(ssoApplications)
     .set(updates)
-    .where(eq(ssoApplications.id, appId))
-    .run();
+    .where(eq(ssoApplications.id, appId));
 
   return successResponse({ message: "Application updated" });
 }
@@ -58,8 +57,8 @@ export async function DELETE(
   const { id } = await params;
   const appId = parseInt(id, 10);
 
-  const db = getDb();
-  const app = db
+  const db = await getDb();
+  const app = await db
     .select()
     .from(ssoApplications)
     .where(and(eq(ssoApplications.id, appId), eq(ssoApplications.ownerUserId, auth.userId)))
@@ -69,6 +68,6 @@ export async function DELETE(
     return errorResponse("NOT_FOUND", "Application not found", 404);
   }
 
-  db.delete(ssoApplications).where(eq(ssoApplications.id, appId)).run();
+  await db.delete(ssoApplications).where(eq(ssoApplications.id, appId));
   return successResponse({ message: "Application deleted" });
 }

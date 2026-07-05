@@ -9,21 +9,21 @@ export async function GET(req: NextRequest) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
 
-  const db = getDb();
+  const db = await getDb();
 
-  const totalUsers = db.select().from(users).all().length;
-  const activeUsers = db
+  const totalUsers = (await db.select().from(users).all()).length;
+  const activeUsers = (await db
     .select()
     .from(users)
     .where(sql`${users.status} = 'active'`)
-    .all().length;
-  const adminUsers = db
+    .all()).length;
+  const adminUsers = (await db
     .select()
     .from(users)
     .where(sql`${users.role} = 'admin'`)
-    .all().length;
+    .all()).length;
 
-  const recentUsers = db
+  const recentUsers = await db
     .select({
       id: users.id,
       username: users.username,
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     .limit(10)
     .all();
 
-  const recentLogs = db
+  const recentLogs = await db
     .select()
     .from(auditLogs)
     .orderBy(sql`${auditLogs.createdAt} DESC`)

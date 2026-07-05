@@ -29,23 +29,22 @@ export async function POST(req: NextRequest) {
   }
 
   const email = sanitizeEmail(parsed.data.email);
-  const db = getDb();
+  const db = await getDb();
 
-  const user = db.select().from(users).where(eq(users.email, email)).get();
+  const user = await db.select().from(users).where(eq(users.email, email)).get();
 
   if (user) {
     const code = generateVerificationCode();
     const expiresAt = new Date(Date.now() + VERIFICATION_CODE_EXPIRY);
 
-    db.insert(verificationCodes)
+    await db.insert(verificationCodes)
       .values({
         email,
         code,
         type: "password_reset",
         expiresAt,
         createdAt: new Date(),
-      })
-      .run();
+      });
 
     await sendPasswordResetEmail(email, code);
     await logAuditEvent(user.id, "forgot_password", ctx.ipAddress, ctx.userAgent);

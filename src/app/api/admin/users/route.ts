@@ -14,14 +14,14 @@ export async function GET(req: NextRequest) {
   const pageSize = parseInt(searchParams.get("pageSize") || "20", 10);
   const search = searchParams.get("search") || "";
 
-  const db = getDb();
+  const db = await getDb();
   const offset = (page - 1) * pageSize;
 
   let query = db.select().from(users);
-  let allUsers;
+  let allUsers: any[];
 
   if (search) {
-    allUsers = db
+    allUsers = await db
       .select()
       .from(users)
       .where(
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
       .offset(offset)
       .all();
   } else {
-    allUsers = db
+    allUsers = await db
       .select()
       .from(users)
       .orderBy(sql`${users.createdAt} DESC`)
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       .all();
   }
 
-  const total = db.select().from(users).all().length;
+  const total = (await db.select().from(users).all()).length;
 
   return paginatedResponse(
     allUsers.map((u) => ({

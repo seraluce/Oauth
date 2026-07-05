@@ -10,8 +10,8 @@ export async function GET(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof Response) return auth;
 
-  const db = getDb();
-  const user = db
+  const db = await getDb();
+  const user = await db
     .select({
       id: users.id,
       username: users.username,
@@ -47,11 +47,10 @@ export async function PATCH(req: NextRequest) {
     return errorResponse("VALIDATION_ERROR", "Invalid input", 400, parsed.error.issues);
   }
 
-  const db = getDb();
-  db.update(users)
+  const db = await getDb();
+  await db.update(users)
     .set({ ...parsed.data, updatedAt: new Date() })
-    .where(eq(users.id, auth.userId))
-    .run();
+    .where(eq(users.id, auth.userId));
 
   return successResponse({ message: "Profile updated" });
 }

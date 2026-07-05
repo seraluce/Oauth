@@ -25,8 +25,8 @@ export async function POST(req: NextRequest) {
     return errorResponse("VALIDATION_ERROR", "Refresh token required", 400);
   }
 
-  const db = getDb();
-  const tokenRecord = db
+  const db = await getDb();
+  const tokenRecord = await db
     .select()
     .from(refreshTokens)
     .where(eq(refreshTokens.token, refreshToken))
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     return errorResponse("INVALID_TOKEN", "Invalid or expired refresh token", 401);
   }
 
-  const user = db
+  const user = await db
     .select({ role: users.role, status: users.status })
     .from(users)
     .where(eq(users.id, tokenRecord.userId))

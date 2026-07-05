@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof Response) return auth;
 
-  const sessions = await getUserSessions(auth.userId);
+  const sessions: any[] = await getUserSessions(auth.userId);
   return successResponse(
     sessions.map((s) => ({
       id: s.id,

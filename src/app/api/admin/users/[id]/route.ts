@@ -18,13 +18,13 @@ export async function GET(
     return errorResponse("VALIDATION_ERROR", "Invalid user ID", 400);
   }
 
-  const db = getDb();
-  const user = db.select().from(users).where(eq(users.id, userId)).get();
+  const db = await getDb();
+  const user = await db.select().from(users).where(eq(users.id, userId)).get();
   if (!user) {
     return errorResponse("NOT_FOUND", "User not found", 404);
   }
 
-  const logs = db
+  const logs = await db
     .select()
     .from(auditLogs)
     .where(eq(auditLogs.userId, userId))
@@ -57,7 +57,7 @@ export async function PATCH(
   }
 
   const { role, status } = body;
-  const db = getDb();
+  const db = await getDb();
 
   const updates: Record<string, any> = { updatedAt: new Date() };
   if (role && ["user", "admin"].includes(role)) updates.role = role;
@@ -65,10 +65,9 @@ export async function PATCH(
     updates.status = status;
   }
 
-  db.update(users)
+  await db.update(users)
     .set(updates)
-    .where(eq(users.id, userId))
-    .run();
+    .where(eq(users.id, userId));
 
   await logAuditEvent(
     auth.userId,

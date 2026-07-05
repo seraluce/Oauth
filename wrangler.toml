@@ -3,7 +3,12 @@ compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".open-next"
 
+[[d1_databases]]
+binding = "DB"
+database_name = "sso-auth-db"
+database_id = "<YOUR_D1_DATABASE_ID>"
+
 [vars]
-DB_DRIVER = "sqlite"
+DB_DRIVER = "d1"
 NEXT_PUBLIC_APP_NAME = "SSO Auth"
 EMAIL_MODE = "console"

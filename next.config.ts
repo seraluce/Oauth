@@ -16,6 +16,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["better-sqlite3", "mysql2", "pg"],
   headers: async () => {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
   }
 
   const email = sanitizeEmail(parsed.data.email);
-  const db = getDb();
+  const db = await getDb();
 
-  const user = db.select().from(users).where(eq(users.email, email)).get();
+  const user = await db.select().from(users).where(eq(users.email, email)).get();
   if (!user || user.emailVerifiedAt) {
     return successResponse({
       message: "If an unverified account exists, a code has been sent.",
@@ -41,15 +41,14 @@ export async function POST(req: NextRequest) {
   const code = generateVerificationCode();
   const expiresAt = new Date(Date.now() + VERIFICATION_CODE_EXPIRY);
 
-  db.insert(verificationCodes)
+  await db.insert(verificationCodes)
     .values({
       email,
       code,
       type: "email_verification",
       expiresAt,
       createdAt: new Date(),
-    })
-    .run();
+    });
 
   await sendVerificationEmail(email, code);
 

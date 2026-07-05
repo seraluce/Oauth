@@ -11,13 +11,13 @@ export async function createApplication(
   description?: string,
   scopes?: string
 ): Promise<{ application: any; clientSecret: string }> {
-  const db = getDb();
+  const db = await getDb();
   const clientId = generateClientId();
   const clientSecret = generateClientSecret();
   const clientSecretHash = await hashPassword(clientSecret);
   const now = new Date();
 
-  const result = db
+  const result = await db
     .insert(ssoApplications)
     .values({
       name,
@@ -41,8 +41,8 @@ export async function validateClient(
   clientId: string,
   clientSecret: string
 ): Promise<any | null> {
-  const db = getDb();
-  const app = db
+  const db = await getDb();
+  const app = await db
     .select()
     .from(ssoApplications)
     .where(eq(ssoApplications.clientId, clientId))
@@ -59,8 +59,8 @@ export async function validateClient(
 export async function getApplicationByClientId(
   clientId: string
 ): Promise<any | null> {
-  const db = getDb();
-  return db
+  const db = await getDb();
+  return await db
     .select()
     .from(ssoApplications)
     .where(eq(ssoApplications.clientId, clientId))
@@ -68,8 +68,8 @@ export async function getApplicationByClientId(
 }
 
 export async function getApplicationById(id: number): Promise<any | null> {
-  const db = getDb();
-  return db
+  const db = await getDb();
+  return await db
     .select()
     .from(ssoApplications)
     .where(eq(ssoApplications.id, id))
@@ -77,8 +77,8 @@ export async function getApplicationById(id: number): Promise<any | null> {
 }
 
 export async function getUserApplications(userId: number) {
-  const db = getDb();
-  return db
+  const db = await getDb();
+  return await db
     .select()
     .from(ssoApplications)
     .where(eq(ssoApplications.ownerUserId, userId))

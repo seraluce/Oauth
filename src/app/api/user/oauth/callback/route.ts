@@ -50,9 +50,9 @@ export async function GET(req: NextRequest) {
     const tokens = await provider.exchangeCode(code);
     const userInfo = await provider.getUserInfo(tokens.accessToken);
 
-    const db = getDb();
+    const db = await getDb();
 
-    const existing = db
+    const existing = await db
       .select()
       .from(oauthAccounts)
       .where(
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
       .get();
 
     if (existing) {
-      db.update(oauthAccounts)
+      await db.update(oauthAccounts)
         .set({
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken || null,
@@ -73,10 +73,9 @@ export async function GET(req: NextRequest) {
             : null,
           scope: tokens.scope || null,
         })
-        .where(eq(oauthAccounts.id, existing.id))
-        .run();
+        .where(eq(oauthAccounts.id, existing.id));
     } else {
-      const alreadyBound = db
+      const alreadyBound = await db
         .select()
         .from(oauthAccounts)
         .where(
@@ -96,7 +95,7 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      db.insert(oauthAccounts)
+      await db.insert(oauthAccounts)
         .values({
           userId,
           provider: providerName,
@@ -108,21 +107,19 @@ export async function GET(req: NextRequest) {
             : null,
           scope: tokens.scope || null,
           createdAt: new Date(),
-        })
-        .run();
+        });
     }
 
-    const user = db
+    const user = await db
       .select({ avatarUrl: users.avatarUrl, displayName: users.displayName })
       .from(users)
       .where(eq(users.id, userId))
       .get();
 
     if (!user?.avatarUrl && userInfo.avatarUrl) {
-      db.update(users)
+      await db.update(users)
         .set({ avatarUrl: userInfo.avatarUrl, updatedAt: new Date() })
-        .where(eq(users.id, userId))
-        .run();
+        .where(eq(users.id, userId));
     }
 
     return new Response(null, {
