@@ -119,7 +119,7 @@ SESSION_SECRET=<随机64字符字符串>
 BCRYPT_ROUNDS=12
 
 # SSO OAuth2 服务器
-SSO_ISSUER=http://localhost:3000
+SSO_ISSUER=https://your-domain.pages.dev
 SSO_PRIVATE_KEY=          # RSA 私钥（PEM格式）
 SSO_PUBLIC_KEY=           # RSA 公钥（PEM格式）
 
@@ -139,10 +139,11 @@ SMTP_PORT=587
 SMTP_USER=
 SMTP_PASSWORD=
 
-# 应用
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+# 应用（生产环境必须使用 https）
+# 开发环境: NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=https://your-domain.pages.dev
 NEXT_PUBLIC_APP_NAME=SSO Auth
-NODE_ENV=development
+NODE_ENV=production
 
 # 安全
 LOCKOUT_MAX_ATTEMPTS=5
