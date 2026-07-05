@@ -1,0 +1,139 @@
+import { NextRequest } from "next/server";
+import { getDb } from "@/lib/db";
+import { oauthAccounts, users } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
+import { getCache } from "@/lib/redis";
+import { githubProvider } from "@/lib/oauth-providers/github";
+import { googleProvider } from "@/lib/oauth-providers/google";
+import { APP_URL } from "@/lib/utils/constants";
+import type { OAuthProvider } from "@/lib/oauth-providers/types";
+
+const providers: Record<string, OAuthProvider> = {
+  github: githubProvider,
+  google: googleProvider,
+};
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const code = searchParams.get("code");
+  const state = searchParams.get("state");
+  const providerName = searchParams.get("provider");
+
+  if (!code || !state || !providerName) {
+    return new Response(null, {
+      status: 302,
+      headers: { Location: `${APP_URL}/login?error=oauth_missing_params` },
+    });
+  }
+
+  const provider = providers[providerName];
+  if (!provider) {
+    return new Response(null, {
+      status: 302,
+      headers: { Location: `${APP_URL}/login?error=invalid_provider` },
+    });
+  }
+
+  const cache = getCache();
+  const userIdStr = await cache.get(`oauth_state:${state}`);
+  if (!userIdStr) {
+    return new Response(null, {
+      status: 302,
+      headers: { Location: `${APP_URL}/login?error=invalid_state` },
+    });
+  }
+
+  await cache.del(`oauth_state:${state}`);
+  const userId = parseInt(userIdStr, 10);
+
+  try {
+    const tokens = await provider.exchangeCode(code);
+    const userInfo = await provider.getUserInfo(tokens.accessToken);
+
+    const db = getDb();
+
+    const existing = db
+      .select()
+      .from(oauthAccounts)
+      .where(
+        and(
+          eq(oauthAccounts.provider, providerName),
+          eq(oauthAccounts.providerAccountId, userInfo.id)
+        )
+      )
+      .get();
+
+    if (existing) {
+      db.update(oauthAccounts)
+        .set({
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken || null,
+          tokenExpiresAt: tokens.expiresIn
+            ? new Date(Date.now() + tokens.expiresIn * 1000)
+            : null,
+          scope: tokens.scope || null,
+        })
+        .where(eq(oauthAccounts.id, existing.id))
+        .run();
+    } else {
+      const alreadyBound = db
+        .select()
+        .from(oauthAccounts)
+        .where(
+          and(
+            eq(oauthAccounts.userId, userId),
+            eq(oauthAccounts.provider, providerName)
+          )
+        )
+        .get();
+
+      if (alreadyBound) {
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${APP_URL}/settings/oauth?error=already_bound`,
+          },
+        });
+      }
+
+      db.insert(oauthAccounts)
+        .values({
+          userId,
+          provider: providerName,
+          providerAccountId: userInfo.id,
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken || null,
+          tokenExpiresAt: tokens.expiresIn
+            ? new Date(Date.now() + tokens.expiresIn * 1000)
+            : null,
+          scope: tokens.scope || null,
+          createdAt: new Date(),
+        })
+        .run();
+    }
+
+    const user = db
+      .select({ avatarUrl: users.avatarUrl, displayName: users.displayName })
+      .from(users)
+      .where(eq(users.id, userId))
+      .get();
+
+    if (!user?.avatarUrl && userInfo.avatarUrl) {
+      db.update(users)
+        .set({ avatarUrl: userInfo.avatarUrl, updatedAt: new Date() })
+        .where(eq(users.id, userId))
+        .run();
+    }
+
+    return new Response(null, {
+      status: 302,
+      headers: { Location: `${APP_URL}/settings/oauth?success=connected` },
+    });
+  } catch (error) {
+    console.error("[OAuth Callback Error]", error);
+    return new Response(null, {
+      status: 302,
+      headers: { Location: `${APP_URL}/settings/oauth?error=oauth_failed` },
+    });
+  }
+}
