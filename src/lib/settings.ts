@@ -29,32 +29,36 @@ const DEFAULT_CONFIG: SystemConfig = {
 };
 
 export async function getSystemConfig(): Promise<SystemConfig> {
-  const db = await getDb();
-  const rows = await db.select().from(systemSettings).all();
+  try {
+    const db = await getDb();
+    const rows = await db.select().from(systemSettings).all();
 
-  const map: Record<string, string> = {};
-  for (const row of rows) {
-    map[row.key] = row.value;
+    const map: Record<string, string> = {};
+    for (const row of rows) {
+      map[row.key] = row.value;
+    }
+
+    const config: SystemConfig = { ...DEFAULT_CONFIG };
+
+    if (map.siteName) config.siteName = map.siteName;
+    if (map.siteUrl) config.siteUrl = map.siteUrl;
+    if (map.allowRegistration !== undefined) {
+      config.allowRegistration = map.allowRegistration === "true";
+    }
+
+    for (const provider of ["github", "google"] as const) {
+      const prefix = `oauth_${provider}_`;
+      config.oauth[provider] = {
+        enabled: map[`${prefix}enabled`] === "true",
+        clientId: map[`${prefix}client_id`] || "",
+        clientSecret: map[`${prefix}client_secret`] || "",
+      };
+    }
+
+    return config;
+  } catch {
+    return { ...DEFAULT_CONFIG };
   }
-
-  const config: SystemConfig = { ...DEFAULT_CONFIG };
-
-  if (map.siteName) config.siteName = map.siteName;
-  if (map.siteUrl) config.siteUrl = map.siteUrl;
-  if (map.allowRegistration !== undefined) {
-    config.allowRegistration = map.allowRegistration === "true";
-  }
-
-  for (const provider of ["github", "google"] as const) {
-    const prefix = `oauth_${provider}_`;
-    config.oauth[provider] = {
-      enabled: map[`${prefix}enabled`] === "true",
-      clientId: map[`${prefix}client_id`] || "",
-      clientSecret: map[`${prefix}client_secret`] || "",
-    };
-  }
-
-  return config;
 }
 
 export async function setSystemConfig(config: SystemConfig): Promise<void> {
@@ -72,21 +76,27 @@ export async function setSystemConfig(config: SystemConfig): Promise<void> {
     ["oauth_google_client_secret", config.oauth.google.clientSecret],
   ];
 
-  for (const [key, value] of entries) {
-    const existing = await db
-      .select()
-      .from(systemSettings)
-      .where(eq(systemSettings.key, key))
-      .get();
+  try {
+    for (const [key, value] of entries) {
+      const existing = await db
+        .select()
+        .from(systemSettings)
+        .where(eq(systemSettings.key, key))
+        .get();
 
-    if (existing) {
-      await db
-        .update(systemSettings)
-        .set({ value })
-        .where(eq(systemSettings.key, key));
-    } else {
-      await db.insert(systemSettings).values({ key, value });
+      if (existing) {
+        await db
+          .update(systemSettings)
+          .set({ value })
+          .where(eq(systemSettings.key, key));
+      } else {
+        await db.insert(systemSettings).values({ key, value });
+      }
     }
+  } catch (error) {
+    throw new Error(
+      "Failed to save settings. Ensure the system_settings table exists (run db:migrate:d1)."
+    );
   }
 }
 

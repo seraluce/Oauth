@@ -270,55 +270,51 @@ function OAuthProviderForm({
         </button>
       </div>
 
-      {state.enabled && (
-        <>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">{t.admin.clientId}</label>
-            <Input
-              value={state.clientId}
-              onChange={(e) => onChange(provider, "clientId", e.target.value)}
-              placeholder={t.admin.clientIdPlaceholder}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">{t.admin.clientSecret}</label>
-            <Input
-              value={state.clientSecret}
-              onChange={(e) => onChange(provider, "clientSecret", e.target.value)}
-              placeholder={t.admin.clientSecretPlaceholder}
-              type="password"
-            />
-            <p className="text-xs text-muted-foreground">{t.admin.clientSecretHint}</p>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">{t.admin.callbackUrl}</label>
-            <div className="flex gap-2">
-              <Input
-                readOnly
-                value={`${typeof window !== "undefined" ? window.location.origin : ""}/api/user/oauth/callback?provider=${provider}`}
-                className="font-mono text-xs"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => onCopyCallback(provider)}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          <a
-            href={devUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+      <div className="space-y-2">
+        <label className="text-sm font-medium">{t.admin.clientId}</label>
+        <Input
+          value={state.clientId}
+          onChange={(e) => onChange(provider, "clientId", e.target.value)}
+          placeholder={t.admin.clientIdPlaceholder}
+        />
+      </div>
+      <div className="space-y-2">
+        <label className="text-sm font-medium">{t.admin.clientSecret}</label>
+        <Input
+          value={state.clientSecret}
+          onChange={(e) => onChange(provider, "clientSecret", e.target.value)}
+          placeholder={t.admin.clientSecretPlaceholder}
+          type="password"
+        />
+        <p className="text-xs text-muted-foreground">{t.admin.clientSecretHint}</p>
+      </div>
+      <div className="space-y-2">
+        <label className="text-sm font-medium">{t.admin.callbackUrl}</label>
+        <div className="flex gap-2">
+          <Input
+            readOnly
+            value={`${typeof window !== "undefined" ? window.location.origin : ""}/api/user/oauth/callback?provider=${provider}`}
+            className="font-mono text-xs"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onCopyCallback(provider)}
           >
-            <ExternalLink className="h-3.5 w-3.5" />
-            {t.admin.createOAuthApp}
-          </a>
-        </>
-      )}
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      <a
+        href={devUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+      >
+        <ExternalLink className="h-3.5 w-3.5" />
+        {t.admin.createOAuthApp}
+      </a>
     </div>
   );
 }

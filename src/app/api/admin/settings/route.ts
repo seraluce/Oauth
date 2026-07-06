@@ -8,24 +8,29 @@ export async function GET(req: NextRequest) {
   const admin = await requireAdmin(req);
   if (admin instanceof Response) return admin;
 
-  const config = await getSystemConfig();
-  return successResponse({
-    ...config,
-    oauth: {
-      github: {
-        ...config.oauth.github,
-        clientSecret: config.oauth.github.clientSecret
-          ? "••••••••" + config.oauth.github.clientSecret.slice(-4)
-          : "",
+  try {
+    const config = await getSystemConfig();
+    return successResponse({
+      ...config,
+      oauth: {
+        github: {
+          ...config.oauth.github,
+          clientSecret: config.oauth.github.clientSecret
+            ? "••••••••" + config.oauth.github.clientSecret.slice(-4)
+            : "",
+        },
+        google: {
+          ...config.oauth.google,
+          clientSecret: config.oauth.google.clientSecret
+            ? "••••••••" + config.oauth.google.clientSecret.slice(-4)
+            : "",
+        },
       },
-      google: {
-        ...config.oauth.google,
-        clientSecret: config.oauth.google.clientSecret
-          ? "••••••••" + config.oauth.google.clientSecret.slice(-4)
-          : "",
-      },
-    },
-  });
+    });
+  } catch (error) {
+    console.error("[Settings] Failed to load config:", error);
+    return errorResponse("INTERNAL_ERROR", "Failed to load settings", 500);
+  }
 }
 
 export async function PATCH(req: NextRequest) {

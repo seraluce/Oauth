@@ -124,5 +124,11 @@ CREATE TABLE IF NOT EXISTS id_sequence (
   current_value INTEGER NOT NULL DEFAULT 11999
 );
 
+-- 11. System settings table
+CREATE TABLE IF NOT EXISTS system_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
 -- Initialize ID sequence
 INSERT INTO id_sequence (name, current_value) VALUES ('user_id', 11999);
