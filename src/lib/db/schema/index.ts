@@ -8,3 +8,4 @@ export { refreshTokens } from "./refresh-tokens";
 export { userSettings } from "./user-settings";
 export { auditLogs } from "./audit-logs";
 export { idSequence } from "./id-sequence";
+export { systemSettings } from "./system-settings";

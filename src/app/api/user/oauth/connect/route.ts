@@ -1,16 +1,9 @@
 import { NextRequest } from "next/server";
 import { nanoid } from "nanoid";
 import { getCache } from "@/lib/redis";
-import { githubProvider } from "@/lib/oauth-providers/github";
-import { googleProvider } from "@/lib/oauth-providers/google";
+import { getEnabledProviders } from "@/lib/oauth-providers";
 import { successResponse, errorResponse } from "@/lib/api/response";
-import { buildContext, requireAuth } from "@/lib/api/handler";
-import type { OAuthProvider } from "@/lib/oauth-providers/types";
-
-const providers: Record<string, OAuthProvider> = {
-  github: githubProvider,
-  google: googleProvider,
-};
+import { requireAuth } from "@/lib/api/handler";
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
@@ -24,8 +17,10 @@ export async function POST(req: NextRequest) {
   }
 
   const { provider } = body;
+  const providers = await getEnabledProviders();
+
   if (!provider || !providers[provider]) {
-    return errorResponse("VALIDATION_ERROR", "Invalid provider", 400);
+    return errorResponse("VALIDATION_ERROR", "Invalid or unconfigured provider", 400);
   }
 
   const state = nanoid(32);

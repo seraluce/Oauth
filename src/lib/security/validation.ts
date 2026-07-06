@@ -84,3 +84,19 @@ export const createSsoApplicationSchema = z.object({
   redirectUris: z.array(z.string().url()).min(1),
   scopes: z.string().optional(),
 });
+
+const oauthProviderConfigSchema = z.object({
+  enabled: z.boolean(),
+  clientId: z.string().max(500).default(""),
+  clientSecret: z.string().max(500).default(""),
+});
+
+export const updateSystemSettingsSchema = z.object({
+  siteName: z.string().min(1).max(100),
+  siteUrl: z.string().max(500).default(""),
+  allowRegistration: z.boolean(),
+  oauth: z.object({
+    github: oauthProviderConfigSchema,
+    google: oauthProviderConfigSchema,
+  }),
+});

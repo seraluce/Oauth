@@ -3,15 +3,8 @@ import { getDb } from "@/lib/db";
 import { oauthAccounts, users } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getCache } from "@/lib/redis";
-import { githubProvider } from "@/lib/oauth-providers/github";
-import { googleProvider } from "@/lib/oauth-providers/google";
+import { getEnabledProviders } from "@/lib/oauth-providers";
 import { APP_URL } from "@/lib/utils/constants";
-import type { OAuthProvider } from "@/lib/oauth-providers/types";
-
-const providers: Record<string, OAuthProvider> = {
-  github: githubProvider,
-  google: googleProvider,
-};
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -26,6 +19,7 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  const providers = await getEnabledProviders();
   const provider = providers[providerName];
   if (!provider) {
     return new Response(null, {
@@ -57,7 +51,7 @@ export async function GET(req: NextRequest) {
       .from(oauthAccounts)
       .where(
         and(
-          eq(oauthAccounts.provider, providerName),
+          eq(oauthAccounts.provider, providerName as any),
           eq(oauthAccounts.providerAccountId, userInfo.id)
         )
       )
@@ -81,7 +75,7 @@ export async function GET(req: NextRequest) {
         .where(
           and(
             eq(oauthAccounts.userId, userId),
-            eq(oauthAccounts.provider, providerName)
+            eq(oauthAccounts.provider, providerName as any)
           )
         )
         .get();
@@ -98,7 +92,7 @@ export async function GET(req: NextRequest) {
       await db.insert(oauthAccounts)
         .values({
           userId,
-          provider: providerName,
+          provider: providerName as any,
           providerAccountId: userInfo.id,
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken || null,

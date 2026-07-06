@@ -110,6 +110,11 @@ export interface IdSequenceRecord {
   currentValue: number;
 }
 
+export interface SystemSettingRecord {
+  key: string;
+  value: string;
+}
+
 export interface AllTables {
   users: any;
   sessions: any;
@@ -121,4 +126,5 @@ export interface AllTables {
   userSettings: any;
   auditLogs: any;
   idSequence: any;
+  systemSettings: any;
 }
